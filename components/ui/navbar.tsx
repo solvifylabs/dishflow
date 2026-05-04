@@ -13,7 +13,7 @@ export function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.webp" alt="Dishflow" width={30} height={30} />
+          <Image src="/logo.webp" alt="Dishflow" width={50} height={50} />
         </div>
 
         <a

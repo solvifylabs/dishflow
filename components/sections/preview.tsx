@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 
 const screens = [
@@ -39,6 +39,11 @@ const screens = [
 
 export function Preview() {
   const [active, setActive] = useState(0);
+  const [loadedSet, setLoadedSet] = useState<Set<number>>(new Set());
+
+  const markLoaded = useCallback((i: number) => {
+    setLoadedSet(prev => new Set(prev).add(i));
+  }, []);
 
   return (
     <section className="py-32 bg-[#0e0e10] overflow-hidden">
@@ -114,22 +119,39 @@ export function Preview() {
           </div>
 
           {/* Screenshot */}
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-hidden aspect-4/3 bg-[#111113]">
+            <AnimatePresence>
+              {!loadedSet.has(active) && (
+                <motion.div
+                  key="skeleton"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 z-10 bg-[#1a1a1c] animate-pulse"
+                />
+              )}
+            </AnimatePresence>
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={active}
                 initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{
+                  opacity: loadedSet.has(active) ? 1 : 0,
+                  y: loadedSet.has(active) ? 0 : 8,
+                }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
+                className="absolute inset-0"
               >
                 <Image
                   src={screens[active].file}
                   alt={screens[active].label}
-                  width={1200}
-                  height={900}
-                  className="w-full h-auto"
+                  fill
+                  className="object-cover"
                   priority={active === 0}
+                  onLoad={() => markLoaded(active)}
                 />
               </motion.div>
             </AnimatePresence>
